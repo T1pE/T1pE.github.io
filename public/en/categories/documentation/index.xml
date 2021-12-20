@@ -1,8 +1,0 @@
-<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
-    <channel>
-        <title>Documentation - Category - T1p3 Site</title>
-        <link>https://github.com/T1pE/T1p3_Blog.git/en/categories/documentation/</link>
-        <description>Documentation - Category - T1p3 Site</description>
-        <generator>Hugo -- gohugo.io</generator><language>en</language><managingEditor>T1pe@qq.com (T1p3)</managingEditor>
-            <webMaster>T1pe@qq.com (T1p3)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><atom:link href="https://github.com/T1pE/T1p3_Blog.git/en/categories/documentation/" rel="self" type="application/rss+xml" /></channel>
-</rss>
