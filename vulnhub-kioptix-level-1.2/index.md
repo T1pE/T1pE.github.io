@@ -1,4 +1,4 @@
-# Vulnhub Kioptix Level 3
+# Vulnhub Kioptix Level 1.2(#3)
 
 
 # Vulnhub-kioptix-Level-1.2（#3）
