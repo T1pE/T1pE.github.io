@@ -6,7 +6,7 @@
         <meta name="robots" content="noodp" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
         <title>Vulnhub Kioptix Level 1 - T1p3 Site</title><meta name="Description" content="关于 LoveIt 主题"><meta property="og:title" content="Vulnhub Kioptix Level 1" />
-<meta property="og:description" content="Vulnhub-kioptix-Level-1 基本信息 kali:192.168.110.10 靶机:192.168.110.12 一、信息收集 1 arp-scan -l 1 nmap -sV 192.168.110.12 Apache/1.3.20、mod_ssl/2.8.4、OpenSS" />
+<meta property="og:description" content="Vulnhub-kioptix-Level-1（#1） 基本信息 kali:192.168.110.10 靶机:192.168.110.12 一、信息收集 1 arp-scan -l 1 nmap -sV 192.168.110.12 Apache/1" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://example.com/vulnhub-kioptix-level-1/" /><meta property="og:image" content="https://example.com"/><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2022-06-04T21:39:00+08:00" />
@@ -16,11 +16,11 @@
 <meta name="twitter:image" content="https://example.com"/>
 
 <meta name="twitter:title" content="Vulnhub Kioptix Level 1"/>
-<meta name="twitter:description" content="Vulnhub-kioptix-Level-1 基本信息 kali:192.168.110.10 靶机:192.168.110.12 一、信息收集 1 arp-scan -l 1 nmap -sV 192.168.110.12 Apache/1.3.20、mod_ssl/2.8.4、OpenSS"/>
+<meta name="twitter:description" content="Vulnhub-kioptix-Level-1（#1） 基本信息 kali:192.168.110.10 靶机:192.168.110.12 一、信息收集 1 arp-scan -l 1 nmap -sV 192.168.110.12 Apache/1"/>
 <meta name="application-name" content="LoveIt">
 <meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://example.com/vulnhub-kioptix-level-1/" /><link rel="prev" href="https://example.com/cve-2019-14271%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" /><link rel="next" href="https://example.com/vulnhub-kioptix-level-2/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://example.com/vulnhub-kioptix-level-1/" /><link rel="prev" href="https://example.com/cve-2019-14271%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" /><link rel="next" href="https://example.com/vulnhub-kioptix-level-1.1/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
     {
         "@context": "http://schema.org",
         "@type": "BlogPosting",
@@ -29,7 +29,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/example.com\/vulnhub-kioptix-level-1\/"
-        },"genre": "posts","keywords": "vulnhub","wordcount":  304 ,
+        },"genre": "posts","keywords": "vulnhub","wordcount":  330 ,
         "url": "https:\/\/example.com\/vulnhub-kioptix-level-1\/","datePublished": "2022-06-04T21:39:00+08:00","dateModified": "2022-06-04T21:39:00+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
             "@type": "Organization",
             "name": ""},"author": {
@@ -106,7 +106,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animated flipInX">Vulnhub Kioptix Level 1</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>T1p3</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/%E9%9D%B6%E6%9C%BA/"><i class="far fa-folder fa-fw"></i>靶机</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-06-04">2022-06-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 304 字&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-06-04">2022-06-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 330 字&nbsp;
                 <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 1 分钟&nbsp;</div>
         </div><div class="details toc" id="toc-static"  kept="">
                 <div class="details-summary toc-title">
@@ -126,7 +126,7 @@
     </li>
   </ul>
 </nav></div>
-            </div><div class="content" id="content"><h1 id="vulnhub-kioptix-level-1">Vulnhub-kioptix-Level-1</h1>
+            </div><div class="content" id="content"><h1 id="vulnhub-kioptix-level-11">Vulnhub-kioptix-Level-1（#1）</h1>
 <h3 id="基本信息">基本信息</h3>
 <p>kali:192.168.110.10</p>
 <p>靶机:192.168.110.12</p>
@@ -372,7 +372,7 @@
     </div>
 
     <div class="post-nav"><a href="/cve-2019-14271%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" class="prev" rel="prev" title="CVE-2019-14271漏洞复现"><i class="fas fa-angle-left fa-fw"></i>CVE-2019-14271漏洞复现</a>
-            <a href="/vulnhub-kioptix-level-2/" class="next" rel="next" title="Vulnhub Kioptix Level 2">Vulnhub Kioptix Level 2<i class="fas fa-angle-right fa-fw"></i></a></div>
+            <a href="/vulnhub-kioptix-level-1.1/" class="next" rel="next" title="Vulnhub Kioptix Level 2">Vulnhub Kioptix Level 2<i class="fas fa-angle-right fa-fw"></i></a></div>
 </div>
 <div id="comments"><div id="disqus_thread" class="comment"></div><noscript>
                 Please enable JavaScript to view the comments powered by <a href="https://disqus.com/?ref_noscript">Disqus</a>.
