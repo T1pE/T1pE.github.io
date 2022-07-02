@@ -35,6 +35,8 @@ nikto -host http://192.168.110.12/
 
 443端口使用了mod_ssl服务为2.8.4
 
+### 二、漏洞利用
+
 ### 漏洞利用1
 
 ![](/vulnhub-kioptix-Level-1/04.JPG)
@@ -108,3 +110,5 @@ nano 47080.c
 `./samba -b 0 192.168.110.12`
 
 ![](/vulnhub-kioptix-Level-1/17.JPG)
+
+已拿到root权限
